@@ -28,7 +28,7 @@ VALIDATE () {
     fi
 }
 
-mongod --version
+mongod --version &>> $LOG_FILE
 if [ $? -eq 0 ]
 then
     echo "mongodb is already installed in the server:: skipping"
