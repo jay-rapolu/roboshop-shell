@@ -50,41 +50,27 @@ fi
 mkdir -p /app 
 VALIDATE $? "Creating directory for application"
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOG_FILE
+curl -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip &>> $LOG_FILE
 VALIDATE $? "downloading source code"
 
 cd /app 
 rm -rf *
-unzip /tmp/catalogue.zip &>> $LOG_FILE
+unzip /tmp/user.zip &>> $LOG_FILE
 VALIDATE $? "deploying source code"
-rm -rf /tmp/catalogue.zip
+rm -rf /tmp/user.zip
 
 npm install &>> $LOG_FILE
 VALIDATE $? "Installing dependencies"
 
-cp $SCRIPT_PATH/catalogue.service /etc/systemd/system/catalogue.service 
-VALIDATE $? "creating catalogue service file"
+cp $SCRIPT_PATH/user.service /etc/systemd/system/user.service 
+VALIDATE $? "creating user service file"
 
 systemctl daemon-reload &>> $LOG_FILE
 VALIDATE $? "reloading systemctl service"
 
-systemctl enable catalogue &>> $LOG_FILE
-VALIDATE $? "enabling catalogue service"
+systemctl enable user &>> $LOG_FILE
+VALIDATE $? "enabling user service"
 
-systemctl start catalogue
-VALIDATE $? "starting catalogue service"
+systemctl start user
+VALIDATE $? "starting user service"
 
-cp $SCRIPT_PATH/mongo.repo /etc/yum.repos.d/mongo.repo
-VALIDATE $? "creating mongodb repo file"
-
-dnf install mongodb-mongosh -y &>> $LOG_FILE
-VALIDATE $? "installing mongodb client"
-
-STATUS=$(mongosh --host mongodb.jayachandrarapolu.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
-if [ $STATUS -lt 0 ]
-then
-    mongosh --host mongodb.jayachandrarapolu.site </app/db/master-data.js &>> $LOG_FILE
-    VALIDATE $? "loading data to db."
-else
-    echo "db already exists"
-fi
