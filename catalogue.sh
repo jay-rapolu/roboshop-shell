@@ -30,16 +30,58 @@ VALIDATE () {
 }
 
 dnf module disable nodejs -y
+VALIDATE $? "disabling default nodejs"
+
 dnf module enable nodejs:20 -y
+VALIDATE $? "enabling nodejs version 20"
+
 dnf install nodejs -y
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-mkdir /app 
+VALIDATE $? "Installing nodejs"
+
+id roboshop &>> /dev/null
+if [ $? -eq 0 ]
+then
+    echo "user already exists skipping"
+else
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    VALIDATE $? "adding roboshop system user"
+fi
+
+mkdir -p /app 
+VALIDATE $? "Creating directory for application"
+
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip 
+VALIDATE $? "downloading source code"
+
 cd /app 
+rm -rf *
 unzip /tmp/catalogue.zip
-cd /app 
+VALIDATE $? "deploying source code"
+rm -rf /tmp/catalogue.zip
+
 npm install 
+VALIDATE $? "Installing dependencies"
+
 systemctl daemon-reload
+VALIDATE $? "reloading systemctl service"
+
 systemctl enable catalogue 
+VALIDATE $? "enabling caltalogue service"
+
 systemctl start catalogue
-cp SV
+VALIDATE $? "starting caltalogue service"
+
+cp $SCRIPT_PATH/mongo.repo /etc/yum.repos.d/mongo.repo
+VALIDATE $? "creating mongodb repo file"
+
+dnf install mongodb-mongosh -y
+VALIDATE $? "installing mongodb client"
+
+STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.jayachandrarapolu.site </app/db/master-data.js
+    VALIDATE $? "loading data to db."
+else
+    echo "db already exists"
+fi
