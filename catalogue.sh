@@ -4,6 +4,7 @@ USER_ID=$(id -u)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOG_DIR="/var/log/roboshop-logs"
 LOG_FILE="$LOG_DIR/$SCRIPT_NAME.log"
+SCRIPT_PATH=$PWD
 
 if [ $USER_ID -ne 0 ]
 then
@@ -28,26 +29,17 @@ VALIDATE () {
     fi
 }
 
-mongod --version &>> $LOG_FILE
-if [ $? -eq 0 ]
-then
-    echo "mongodb is already installed in the server:: skipping"
-else
-    cp ./mongo.repo /etc/yum.repos.d/mongo.repo
-    VALIDATE $? "Creating mongodb repo file"
-
-    dnf install mongodb-org -y &>> $LOG_FILE
-    VALIDATE $? "Installing Mongodb"
-
-    systemctl enable mongod &>> $LOG_FILE
-    VALIDATE $? "Enabling Mongodb"
-
-    systemctl start mongod 
-    VALIDATE $? "Starting Mongodb" 
-
-    sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
-    VALIDATE $? "Allowing remote connections" 
-
-    systemctl restart mongod
-    VALIDATE $? "Restarting Mongodb" 
-fi
+dnf module disable nodejs -y
+dnf module enable nodejs:20 -y
+dnf install nodejs -y
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+mkdir /app 
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip 
+cd /app 
+unzip /tmp/catalogue.zip
+cd /app 
+npm install 
+systemctl daemon-reload
+systemctl enable catalogue 
+systemctl start catalogue
+cp SV

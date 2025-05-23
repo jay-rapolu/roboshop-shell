@@ -2,8 +2,8 @@
 
 USER_ID=$(id -u)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
-SCRIPT_DIR="/var/log/roboshop-logs"
-LOG_FILE="$SCRIPT_DIR/$SCRIPT_NAME.log"
+LOG_DIR="/var/log/roboshop-logs"
+LOG_FILE="$LOG_DIR/$SCRIPT_NAME.log"
 
 if [ $USER_ID -ne 0 ]
 then
@@ -11,7 +11,7 @@ then
     exit 1
 else
     echo "Running script as root user"
-    mkdir -p $SCRIPT_DIR
+    mkdir -p $LOG_DIR
 fi
 
 echo "##########################################" &>> $LOG_FILE
