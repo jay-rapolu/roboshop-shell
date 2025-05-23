@@ -28,7 +28,7 @@ VALIDATE () {
     fi
 }
 
-mysql -v &>> $LOG_FILE
+mysql --version &>> $LOG_FILE
 if [ $? -eq 0 ]
 then
     echo "mysql is already installed.. skipping" | tee -a $LOG_FILE
