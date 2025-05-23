@@ -64,10 +64,10 @@ VALIDATE $? "creating shipping service file"
 systemctl daemon-reload &>> $LOG_FILE
 VALIDATE $? "reloading systemctl service"
 
-systemctl enable user &>> $LOG_FILE
+systemctl enable shipping &>> $LOG_FILE
 VALIDATE $? "enabling shipping service"
 
-systemctl start user
+systemctl start shipping
 VALIDATE $? "starting shipping service"
 
 dnf install mysql -y 

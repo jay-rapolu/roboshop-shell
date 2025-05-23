@@ -62,9 +62,9 @@ VALIDATE $? "creating user service file"
 systemctl daemon-reload &>> $LOG_FILE
 VALIDATE $? "reloading systemctl service"
 
-systemctl enable user &>> $LOG_FILE
-VALIDATE $? "enabling user service"
+systemctl enable payment &>> $LOG_FILE
+VALIDATE $? "enabling payment service"
 
-systemctl start user
-VALIDATE $? "starting user service"
+systemctl start payment
+VALIDATE $? "starting payment service"
 
