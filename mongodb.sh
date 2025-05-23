@@ -14,9 +14,9 @@ else
     mkdir -p $SCRIPT_DIR
 fi
 
-echo "##########################################"
-echo "Script Started executing at '"$(date)"'"
-echo "##########################################"
+echo "##########################################" &>> $LOG_FILE
+echo "Script Started executing at '"$(date)"'" | tee -a $LOG_FILE
+echo "##########################################" &>> $LOG_FILE
 
 VALIDATE () {
     if [ $1 -ne 0 ]
@@ -28,7 +28,7 @@ VALIDATE () {
     fi
 }
 
-mongodb --version
+mongod --version
 if [ $? -eq 0 ]
 then
     echo "mongodb is already installed in the server:: skipping"
