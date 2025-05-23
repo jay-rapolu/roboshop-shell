@@ -28,22 +28,30 @@ VALIDATE () {
     fi
 }
 
-read -s -p "enter a password for rabbitmq roboshop user:" RABBITMQ_PASSWORD
+rabbitmqctl version &>> $LOG_FILE
+if [ $? -eq 0 ]
+then
+    echo "rabbitmq is already installed.. skipping"
+    exit 1
+else
+    read -s -p "enter a password for rabbitmq roboshop user:" RABBITMQ_PASSWORD
+    echo ""
 
-cp ./rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo
-VALIDATE $? "creating rabbitmq repo"
+    cp ./rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo
+    VALIDATE $? "creating rabbitmq repo"
 
-dnf install rabbitmq-server -y &>> $LOG_FILE
-VALIDATE $? "installing rabbitmq"
+    dnf install rabbitmq-server -y &>> $LOG_FILE
+    VALIDATE $? "installing rabbitmq"
 
-systemctl enable rabbitmq-server &>> $LOG_FILE
-VALIDATE $? "enabling rabbitmq"
+    systemctl enable rabbitmq-server &>> $LOG_FILE
+    VALIDATE $? "enabling rabbitmq"
 
-systemctl start rabbitmq-server
-VALIDATE $? "starting rabbitmq"
+    systemctl start rabbitmq-server
+    VALIDATE $? "starting rabbitmq"
 
-rabbitmqctl add_user roboshop $RABBITMQ_PASSWORD &>> $LOG_FILE
-VALIDATE $? "adding user to rabbitmq server"
+    rabbitmqctl add_user roboshop $RABBITMQ_PASSWORD &>> $LOG_FILE
+    VALIDATE $? "adding user to rabbitmq server"
 
-rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>> $LOG_FILE
-VALIDATE $? "setting permissions to user"
+    rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>> $LOG_FILE
+    VALIDATE $? "setting permissions to user"
+fi
