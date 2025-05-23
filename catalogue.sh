@@ -29,13 +29,13 @@ VALIDATE () {
     fi
 }
 
-dnf module disable nodejs -y
+dnf module disable nodejs -y &>> $LOG_FILE
 VALIDATE $? "disabling default nodejs"
 
-dnf module enable nodejs:20 -y
+dnf module enable nodejs:20 -y &>> $LOG_FILE
 VALIDATE $? "enabling nodejs version 20"
 
-dnf install nodejs -y
+dnf install nodejs -y &>> $LOG_FILE
 VALIDATE $? "Installing nodejs"
 
 id roboshop &>> /dev/null
@@ -50,22 +50,25 @@ fi
 mkdir -p /app 
 VALIDATE $? "Creating directory for application"
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip 
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOG_FILE
 VALIDATE $? "downloading source code"
 
 cd /app 
 rm -rf *
-unzip /tmp/catalogue.zip
+unzip /tmp/catalogue.zip &>> $LOG_FILE
 VALIDATE $? "deploying source code"
 rm -rf /tmp/catalogue.zip
 
-npm install 
+npm install &>> $LOG_FILE
 VALIDATE $? "Installing dependencies"
 
-systemctl daemon-reload
+cp $SCRIPT_PATH/catalogue.service /etc/systemd/system/catalogue.service 
+VALIDATE $? "creating mongodb repo file"
+
+systemctl daemon-reload &>> $LOG_FILE
 VALIDATE $? "reloading systemctl service"
 
-systemctl enable catalogue 
+systemctl enable catalogue &>> $LOG_FILE
 VALIDATE $? "enabling caltalogue service"
 
 systemctl start catalogue
@@ -74,13 +77,13 @@ VALIDATE $? "starting caltalogue service"
 cp $SCRIPT_PATH/mongo.repo /etc/yum.repos.d/mongo.repo
 VALIDATE $? "creating mongodb repo file"
 
-dnf install mongodb-mongosh -y
+dnf install mongodb-mongosh -y &>> $LOG_FILE
 VALIDATE $? "installing mongodb client"
 
 STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
 if [ $STATUS -lt 0 ]
 then
-    mongosh --host mongodb.jayachandrarapolu.site </app/db/master-data.js
+    mongosh --host mongodb.jayachandrarapolu.site </app/db/master-data.js &>> $LOG_FILE
     VALIDATE $? "loading data to db."
 else
     echo "db already exists"
