@@ -28,7 +28,7 @@ VALIDATE () {
     fi
 }
 
-redis-server -v
+redis-server -v &>> $LOG_FILE
 if [ $? -eq 0 ]
 then
     echo "redis is already configured.. skipping"
