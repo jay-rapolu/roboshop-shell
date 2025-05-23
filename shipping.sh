@@ -79,6 +79,7 @@ then
     mysql -h mysql.jayachandrarapolu.site -uroot -p$MSQL_ROOT_PASSWORD < /app/db/schema.sql
     mysql -h mysql.jayachandrarapolu.site -uroot -p$MSQL_ROOT_PASSWORD < /app/db/app-user.sql
     mysql -h mysql.jayachandrarapolu.site -uroot -p$MSQL_ROOT_PASSWORD < /app/db/master-data.sql
+    VALIDATE $? "loading data to db."
 else
     echo "db already exists skipping"
 fi
