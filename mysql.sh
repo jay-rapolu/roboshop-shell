@@ -32,9 +32,10 @@ mysql -v &>> $LOG_FILE
 if [ $? -eq 0 ]
 then
     echo "mysql is already installed.. skipping" | tee -a $LOG_FILE
+    exit 1
 else
     read -s -p "Enter a password for your mysql server:" MYSQL_PASSWORD
-    
+
     dnf install mysql-server -y &>> $LOG_FILE
     VALIDATE $? "Installing mysql-server" 
 
